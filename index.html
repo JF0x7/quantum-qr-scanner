@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Qtum Scanner</title>
+
+<style>
+  body {
+    background: #05070d;
+    color: #b9d7ff;
+    font-family: 'Segoe UI', sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #4da6ff;
+    text-shadow: 0 0 12px #1e3cff;
+    margin-bottom: 10px;
+  }
+
+  #quantumLogo {
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px #1e3cff);
+  }
+
+  video {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 14px;
+    border: 2px solid #1e3cff;
+    box-shadow: 0 0 20px #1e3cff88;
+    background: #000;
+  }
+
+  #output {
+    margin-top: 20px;
+    padding: 14px;
+    background: #0b1220;
+    border-radius: 10px;
+    border: 1px solid #1e3cff55;
+    box-shadow: 0 0 12px #1e3cff33;
+  }
+
+  #address {
+    font-family: monospace;
+    word-break: break-all;
+    margin-top: 10px;
+    color: #7dd3fc;
+  }
+
+  .valid { color: #4ade80; }
+  .invalid { color: #f87171; }
+
+  button {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    background: #1e3cff;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 0 10px #1e3cffaa;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Quantum Qtum Scanner</h1>
+
+<!-- Quantum Crowned Q Logo -->
+<svg id="quantumLogo" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="70" stroke="#4da6ff" stroke-width="6" fill="none"/>
+  <circle cx="100" cy="100" r="40" stroke="#1e3cff" stroke-width="4" fill="none"/>
+  <text x="100" y="115" font-size="48" text-anchor="middle" fill="#4da6ff">Q</text>
+  <polygon points="70,40 100,10 130,40" fill="#4da6ff"/>
+</svg>
+
+<video id="video" autoplay playsinline muted></video>
+<canvas id="canvas" hidden></canvas>
+
+<div id="output">
+  <div id="status">Point your camera at a Qtum QR code…</div>
+  <div id="address"></div>
+  <button id="copyBtn" style="display:none;">Copy Address</button>
+</div>
+
+<script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+
+<script>
+  const video = document.getElementById("video");
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const statusEl = document.getElementById("status");
+  const addressEl = document.getElementById("address");
+  const copyBtn = document.getElementById("copyBtn");
+
+  function isQtumAddress(text) {
+    return /^Q[0-9A-Za-z]{25,40}$/.test(text.trim());
+  }
+
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      video.srcObject = stream;
+      requestAnimationFrame(scan);
+    } catch (err) {
+      statusEl.textContent = "Camera access denied or unavailable.";
+    }
+  }
+
+  function scan() {
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(img.data, img.width, img.height);
+
+      if (code) {
+        const text = code.data.trim();
+        addressEl.textContent = text;
+
+        if (isQtumAddress(text)) {
+          statusEl.textContent = "Qtum address detected:";
+          statusEl.className = "valid";
+          copyBtn.style.display = "inline-block";
+        } else {
+          statusEl.textContent = "QR detected (not a Qtum address):";
+          statusEl.className = "invalid";
+          copyBtn.style.display = "none";
+        }
+      }
+    }
+    requestAnimationFrame(scan);
+  }
+
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(addressEl.textContent);
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = "Copy Address", 1500);
+  };
+
+  startCamera();
+</script>
+
+</body>
+</html>
