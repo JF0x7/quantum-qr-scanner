@@ -68,7 +68,6 @@ function handleDecoded(data) {
   statusEl.className = "success";
 
   // QTUM-style detection
-  if (/^(Q|q)[A-Za-z0-9]{20,}/.test(data)) {
     addToLedger(data);
   }
 }
