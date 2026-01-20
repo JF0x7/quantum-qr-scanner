@@ -151,7 +151,9 @@
     setTimeout(() => copyBtn.textContent = "Copy Address", 1500);
   };
 
-  <button onclick="startCamera()">Enable Camera</button>
+  <button id="startBtn">Enable Camera</button>
+  document.getElementById("startBtn").onclick = () => {startCamera();
+};
 </script>
 
 </body>
