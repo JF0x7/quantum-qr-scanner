@@ -120,10 +120,4 @@ flipBtn.onclick = () => {
   useFrontCamera = !useFrontCamera;
   startCamera();
 };
-
-genBtn.onclick = () => {
-  const newAddr = generateQtumAddress();
-  payloadEl.textContent = newAddr;
-  statusEl.textContent = "Generated Qtum address.";
-  statusEl.className = "valid";
-};
+uploadBtn.onclick = () => fileInput.click();
