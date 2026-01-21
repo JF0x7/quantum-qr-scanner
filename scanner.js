@@ -67,9 +67,8 @@ function handleDecoded(data) {
   statusEl.textContent = "QR detected!";
   statusEl.className = "success";
 
-  // QTUM-style detection
-    addToLedger(data);
-  }
+  // Always save to ledger
+  addToLedger(data);
 }
 
 // File upload scanning
